@@ -76,7 +76,7 @@ public class CacheBreakDown {
     /**
      * 使用互斥锁
      * 该方法是比较普遍的做法, 在根据key获得的value值为空时, 先锁上, 再从数据库加载, 加载完毕, 释放锁, 若其他线程发现获取锁失败, 则睡眠后重试
-     * 至于锁的类型, 单机环境用并发包的Lock类型就行, 集群环境则使用分布式锁( redis的setnx)
+     * 至于锁的类型, 单机环境用并发包的Lock类型就行, 集群环境则使用分布式锁 (redis的setnx)
      * <p>
      * 优点: 思路简单 保证数据一致性
      * 缺点: 代码复杂度增大  存在死锁概率
@@ -145,7 +145,7 @@ public class CacheBreakDown {
      * 构建缓存采取异步策略, 会从线程池中取线程来异步构建缓存, 从而不会让所有的请求直接怼到数据库上
      * 该方案redis自己维护一个timeout, 当timeout小于System.currentTimeMillis()时, 则进行缓存更新，否则直接返回value值
      * <p>
-     * 优点: 性价最佳, 用户无需等待
+     * 优点: 体验最佳, 用户无需等待
      * 缺点: 无法保证缓存一致性
      */
     private static String exam2(Jedis jedis, String key) throws InterruptedException {
