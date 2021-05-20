@@ -29,9 +29,9 @@ public class DeleteBigKey {
         // deleteBigList(jedis);
 
         // 创建bighash
-        // createBigHash(jedis);
+         createBigHash(jedis);
         // 删除bighash
-        // deleteBigHash(jedis);
+         deleteBigHash(jedis);
 
         // 创建bigset
         // createBigSet(jedis);
@@ -39,9 +39,9 @@ public class DeleteBigKey {
         // deleteBigSet(jedis);
 
         // 创建bigzset
-        createBigZset(jedis);
+        //createBigZset(jedis);
         // 删除bigzset
-        deleteBigZset(jedis);
+        //deleteBigZset(jedis);
 
         // 记录结束时间
         long end = System.currentTimeMillis();
@@ -130,9 +130,7 @@ public class DeleteBigKey {
             // 得到所有的值
             List<Map.Entry<String, String>> result = hscan.getResult();
             // 遍历删除
-            result.forEach(e -> {
-                jedis.hdel(key, e.getKey());
-            });
+            result.forEach(e -> jedis.hdel(key, e.getKey()));
             // 获取到遍历完毕的指针
             cursor = hscan.getStringCursor();
             System.out.println("cursor: " + cursor);
@@ -172,9 +170,7 @@ public class DeleteBigKey {
             // 结果集对象
             List<String> result = sscan.getResult();
             // 遍历删除
-            result.forEach(e -> {
-                jedis.srem(key, e);
-            });
+            result.forEach(e -> jedis.srem(key, e));
             // 获取到遍历完毕的指针
             cursor = sscan.getStringCursor();
             System.out.println("cursor: " + cursor);
@@ -214,9 +210,7 @@ public class DeleteBigKey {
             // 结果集对象
             List<Tuple> result = zscan.getResult();
             // 遍历删除
-            result.forEach(e -> {
-                jedis.zrem(key, e.getElement());
-            });
+            result.forEach(e -> jedis.zrem(key, e.getElement()));
             // 获取到遍历完毕的指针
             cursor = zscan.getStringCursor();
             System.out.println("cursor: " + cursor);

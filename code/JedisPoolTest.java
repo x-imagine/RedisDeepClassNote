@@ -12,7 +12,7 @@ public class JedisPoolTest {
     /**
      * 创建连接池 需要 commons-pool2-2.6.0.jar
      */
-    private static JedisPool pool = new JedisPool("192.168.146.240", 6379);
+    private static JedisPool pool = new JedisPool("127.0.0.1", 6379);
 
     /**
      * 获得jedis实例
@@ -22,7 +22,7 @@ public class JedisPoolTest {
     public static Jedis getJedis() {
         // 认证
         Jedis jedis = pool.getResource();
-        jedis.auth("admin123");
+//        jedis.auth("admin123");
         return jedis;
     }
 

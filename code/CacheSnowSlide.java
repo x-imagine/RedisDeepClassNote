@@ -16,19 +16,19 @@ public class CacheSnowSlide {
         // 从连接池获取链接
         Jedis jedis = JedisPoolTest.getJedis();
 
-        // for (int i = 0; i < 5; i++) {
-        //     exam1(jedis, "snow:" + i, String.valueOf(i), 60);
-        // }
+//        for (int i = 0; i < 5; i++) {
+//            exam1(jedis, "snow:" + i, String.valueOf(i), 60);
+//        }
 
-        // for (int i = 0; i < 5; i++) {
-        //     new Thread(() -> {
-        //         try {
-        //             exam2(JedisPoolTest.getJedis(), "snow:exam2:1");
-        //         } catch (InterruptedException e) {
-        //             e.printStackTrace();
-        //         }
-        //     }).start();
-        // }
+//         for (int i = 0; i < 5; i++) {
+//             new Thread(() -> {
+//                 try {
+//                     exam2(JedisPoolTest.getJedis(), "snow:exam2:1");
+//                 } catch (InterruptedException e) {
+//                     e.printStackTrace();
+//                 }
+//             }).start();
+//         }
 
         // 启动监听MQ
         new Thread(() -> {

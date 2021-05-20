@@ -15,11 +15,11 @@ public class RedisDataStructure {
     private static Jedis jedis = JedisPoolTest.getJedis();
 
     public static void main(String[] args) {
-        // testString();
-        // testList();
-        // testHash();
-        // testSet();
-        testZSet();
+//         testString();
+//         testList();
+//         testHash();
+//         testSet();
+         testZSet();
     }
 
     /**
@@ -57,7 +57,7 @@ public class RedisDataStructure {
      */
     private static void testHash() {
         for (int i = 0; i < 100; i++) {
-            jedis.hset("hash", "key" + String.valueOf(i), String.valueOf(i));
+            jedis.hset("hash", "key" + i, String.valueOf(i));
         }
 
         // ziplist

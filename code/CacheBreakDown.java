@@ -13,6 +13,24 @@ import java.util.concurrent.*;
  */
 public class CacheBreakDown {
 
+    public static void main(String[] args) throws InterruptedException {
+        // 从连接池获取jedis
+        Jedis jedis = JedisPoolTest.getJedis();
+        jedis.del("hot:post:1:value");
+        jedis.del("hot:post:2:value");
+        jedis.del("hot:post:3:value");
+
+        // 插入过期数据
+        jedis.hset("hot:post:2:value", "value", "hot:post:2:value");
+        jedis.hset("hot:post:2:value", "timeout", String.valueOf(System.currentTimeMillis() - 10));
+
+         current(5, 1);
+
+        // 启动队列
+//        threadPool.execute(() -> execMQ());
+//        current(5, 2);
+    }
+
     /**
      * 并发方法
      *
@@ -26,7 +44,6 @@ public class CacheBreakDown {
     }
 
     static class Runner implements Runnable {
-
         CyclicBarrier cyclicBarrier;
         int methodId;
 
@@ -50,27 +67,6 @@ public class CacheBreakDown {
                 e.printStackTrace();
             }
         }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        // 从连接池获取jedis
-        Jedis jedis = JedisPoolTest.getJedis();
-        jedis.del("hot:post:1:value");
-        jedis.del("hot:post:2:value");
-        jedis.del("hot:post:3:value");
-
-        // 插入过期数据
-        jedis.hset("hot:post:2:value", "value", "hot:post:2:value");
-        jedis.hset("hot:post:2:value", "timeout", String.valueOf(System.currentTimeMillis() - 10));
-
-        // 启动队列
-        threadPool.execute(() -> {
-            execMQ();
-        });
-
-        // current(5, 1);
-        current(5, 2);
-
     }
 
     /**
@@ -108,39 +104,6 @@ public class CacheBreakDown {
     }
 
     /**
-     * 构建线程池
-     */
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-    /**
-     * 构建一个队列
-     */
-    private static LinkedBlockingQueue MQqueue = new LinkedBlockingQueue(255);
-
-    /**
-     * 处理消息的队列
-     */
-    private static void execMQ() {
-        Jedis jedis = JedisPoolTest.getJedis();
-        for (; ; ) {
-            try {
-                // 无限处理队列, 如果没有阻塞
-                String key = (String) MQqueue.take();
-                Map<String, String> map = jedis.hgetAll(key);
-                if (map.isEmpty() || Long.valueOf(map.get("timeout")) <= System.currentTimeMillis()) {
-                    System.out.println("by MQ DB");
-                    jedis.hset(key, "value", getValueByDB(key));
-                    jedis.hset(key, "timeout", String.valueOf(System.currentTimeMillis() + 2000));
-                } else {
-                    System.out.println("by Cache");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * 异步构建缓存
      * 构建缓存采取异步策略, 会从线程池中取线程来异步构建缓存, 从而不会让所有的请求直接怼到数据库上
      * 该方案redis自己维护一个timeout, 当timeout小于System.currentTimeMillis()时, 则进行缓存更新，否则直接返回value值
@@ -153,14 +116,45 @@ public class CacheBreakDown {
         Map<String, String> map = jedis.hgetAll(key);
         if (Long.valueOf(map.get("timeout")) <= System.currentTimeMillis()) {
             // 需要更新数据 异步后台执行
-            threadPool.execute(() -> {
-                MQqueue.add(key);
-            });
+            threadPool.execute(() -> queue.add(key));
         } else {
             // 无需更新数据
-            System.out.println("by Cache");
+            System.out.println("by Cache in exam2");
         }
         return map.get("value");
+    }
+
+    /**
+     * 构建线程池
+     */
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    /**
+     * 构建一个队列
+     */
+    private static LinkedBlockingQueue queue = new LinkedBlockingQueue(255);
+
+    /**
+     * 处理消息的队列
+     */
+    private static void execMQ() {
+        Jedis jedis = JedisPoolTest.getJedis();
+        for (; ; ) {
+            try {
+                // 无限处理队列, 如果没有阻塞
+                String key = (String) queue.take();
+                Map<String, String> map = jedis.hgetAll(key);
+                if (map.isEmpty() || Long.valueOf(map.get("timeout")) <= System.currentTimeMillis()) {
+                    System.out.println("by MQ DB in execMQ");
+                    jedis.hset(key, "value", getValueByDB(key));
+                    jedis.hset(key, "timeout", String.valueOf(System.currentTimeMillis() + 2000));
+                } else {
+                    System.out.println("by Cache in execMQ");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

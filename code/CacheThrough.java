@@ -53,9 +53,7 @@ public class CacheThrough {
             ScanResult<String> scan = jedis.scan(cursor, scanParams);
             // 获得所有key
             List<String> result = scan.getResult();
-            result.forEach(s -> {
-                filter.put(s);
-            });
+            result.forEach(s -> filter.put(s));
             cursor = scan.getStringCursor();
         } while (!"0".equals(cursor));
         System.out.println("boolmFilterCount#: " + filter.approximateElementCount());
